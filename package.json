@@ -1,0 +1,23 @@
+{
+  "name": "protobooth",
+  "version": "0.0.0",
+  "description": "a javascript photobooth application",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gingerchris/protobooth"
+  },
+  "author": "Chris Dowling",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gingerchris/protobooth/issues"
+  },
+  "homepage": "https://github.com/gingerchris/protobooth",
+  "dependencies": {
+    "gulp": "~3.9.0",
+    "gulp-gm": "0.0.7"
+  }
+}
