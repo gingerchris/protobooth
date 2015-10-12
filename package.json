@@ -18,6 +18,13 @@
   "homepage": "https://github.com/gingerchris/protobooth",
   "dependencies": {
     "gulp": "~3.9.0",
-    "gulp-gm": "0.0.7"
+    "gulp-gm": "0.0.7",
+    "opencv": "^3.1.0"
+  },
+  "devDependencies": {
+    "gulp-changed": "^1.3.0",
+    "gulp-foreach": "^0.1.0",
+    "gulp-watch": "^4.3.5",
+    "sqlite3": "^3.1.0"
   }
 }
