@@ -11,15 +11,26 @@ var db = new sqlite3.Database(file);
 var minrow = 0;
 var processed = [];
 
+function sortNumber(a,b) {
+    return a - b;
+}
+
 var readArray = function(){
-  var arr = fs.readFileSync('./processed.json').toString();
-  processed = JSON.parse(arr);
-  return processed[processed.length - 1];
+  try{
+    var arr = fs.readFileSync('./processed.json').toString();
+    processed = JSON.parse(arr);
+    return processed[processed.length - 1];
+  }
+  catch(e){
+    return 0;
+  }
 }
 
 var writeArray = function(id){
   processed.push(id);
-  processed.sort();
+  console.log(processed);
+  processed.sort(sortNumber);
+  console.log(processed);
   fs.writeFile('./processed.json', JSON.stringify(processed), 
     function (err) {
         
@@ -30,31 +41,35 @@ var writeArray = function(id){
 var fetchNew = function(){
   console.log('checking now');
   //check if the DB has been updated, if so get new images
-  db = new sqlite3.Database(file);
-  db.each("SELECT rowid, filename FROM attachment WHERE rowid > "+minrow,function(err,row){
-    if(typeof row !== "undefined"){
-      minrow = row.ROWID;
+  try{
+    db = new sqlite3.Database(file);
+    db.each("SELECT rowid, filename FROM attachment WHERE rowid > "+minrow+" LIMIT 10",function(err,row){
+      if(typeof row !== "undefined"){
+        minrow = row.ROWID;
 
-      image = row.filename;
-      console.log(image);
-      console.log('new minrow:',minrow);
+        image = row.filename;
+        console.log(image);
+        console.log('new minrow:',minrow);
 
-      child = exec('bash bash/process-single.sh '+row.filename, 
-        function (error, stdout, stderr) {      
-          // one easy function to capture data/errors
-          console.log('stdout: ' + stdout);
-          console.log('stderr: ' + stderr);
-          if (error === null){
-            //if there was no error processing and adding to print queue, 
-            //add to the array of processed images
-            writeArray(row.ROWID);
+        child = exec('bash bash/process-single.sh '+row.filename, 
+          function (error, stdout, stderr) {      
+            // one easy function to capture data/errors
+            console.log('stdout: ' + stdout);
+            console.log('stderr: ' + stderr);
+            if (error === null){
+              //if there was no error processing and adding to print queue, 
+              //add to the array of processed images
+              writeArray(row.ROWID);
+            }
+            
           }
-          
-        }
-      );
-    }
-
-  });
+        );
+      }
+    });
+  }
+  catch(e){
+    console.log('error connecting to DB');
+  }
 }
 
 //if first time running, get current Max ID so we don't print any old photos
