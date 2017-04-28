@@ -3,13 +3,17 @@
 FILE="$1"
 FILENAME=$(basename $FILE)
 
-dim=`convert "$FILE" -format "%w:%h" info:`
+#auto-orient photo to correct rotation
+convert "$FILE" -auto-orient ready/$FILENAME.mpc
+f="ready/$FILENAME.mpc"
+
+dim=`convert "$f" -format "%w:%h" info:`
 arrDim=(${dim//:/ })
 
-#auto-orient photo to correct rotation
-convert "$FILE" -auto-orient ready/"$FILENAME"
-
-f="ready/$FILENAME"
+echo "width"
+echo ${arrDim[0]}
+echo "height"
+echo ${arrDim[1]}
 
 if (( ${arrDim[0]} > ${arrDim[1]} )); then
   size="1167x864"
@@ -25,17 +29,23 @@ fi
 
 echo $orient
 
+#create dirs if not already done
+mkdir -p tmp
+mkdir -p printq
+mkdir -p printed
+mkdir -p ready
+
 #duplicate side by side
 composite tmp/$FILENAME.resize.mpc -geometry +18+18 base.png tmp/$FILENAME.temp.mpc
 composite tmp/$FILENAME.resize.mpc -geometry +896+18 tmp/$FILENAME.temp.mpc tmp/$FILENAME.temp.mpc
 
 #save to print queue
-composite templates/$orient.png  tmp/$FILENAME.temp.mpc printq/$FILENAME
+composite templates/$orient.png  tmp/$FILENAME.temp.mpc printq/$FILENAME.jpg
 
 #move original to printed folder
-mv "$f" printed/$FILENAME
+cp "$FILE" printed/$FILENAME
 
-rm tmp/$FILENAME.resize.mpc tmp/$FILENAME.resize.cache tmp/$FILENAME.temp.mpc tmp/$FILENAME.temp.cache
+rm "$f" tmp/$FILENAME.resize.mpc tmp/$FILENAME.resize.cache tmp/$FILENAME.temp.mpc tmp/$FILENAME.temp.cache
 #send to print
-lpr -o landscape -o fit-to-page -o media="Postcard(4x6in)" printq/$FILENAME
+lpr -o landscape -o fit-to-page -o media="Postcard(4x6in)" printq/$FILENAME.jpg
 echo "Printing $f"
